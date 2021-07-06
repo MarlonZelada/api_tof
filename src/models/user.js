@@ -28,7 +28,10 @@ function fyndByUser(data){
               return console.log("err", err);
           }else{
               if(res.length > 0){
-                  resolved(true);
+                let dat = {};
+                dat.usuario = res[0].usuario;
+                dat.password = res[0].password;
+                resolved(dat);
               }else{
                   resolved(false);
               }

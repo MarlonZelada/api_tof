@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 export const newUser = async (req, res) => {
     const { name, user, password } = req.body;
  
-    console.log(name, user, password);
+    //console.log(name, user, password);
 
     const values = {};
     values.name = name;
@@ -17,11 +17,8 @@ export const newUser = async (req, res) => {
 
     async function newU() {
         const fyndUser = await usuario.fyndByUser(values);
-        if(fyndUser){
-            res.status(200).json({
-                message: "User already exists"
-            })
-        }else{
+
+        if(!fyndUser){
             const hash = await extras.createHash(values);
             values.passwordH = hash;
 
@@ -35,7 +32,7 @@ export const newUser = async (req, res) => {
             const savedToken = await usuario.saveToken(values);
 
             const verificationLink = `http://localhost:3000/activate_account/${token}`;
-            let info = await email.transporter.sendMail({
+            /*let info = await email.transporter.sendMail({
                 from: '"Fred Foo 👻" <marlon.zelada@gmail.com>', // sender address
                 to: user, // list of receivers
                 subject: "Confirmar Correo ✔", // Subject line
@@ -44,7 +41,7 @@ export const newUser = async (req, res) => {
                         ${name}
                         <b>, click en el siguiente enlace para activar tu cuenta </b> </>
                         ${verificationLink}`, // html body
-            });
+            });*/
             if(savedToken){
                 res.status(200).json({
                     message: "New User OK",
@@ -53,7 +50,10 @@ export const newUser = async (req, res) => {
                 })
 
             }
-            
+        }else{
+            res.status(200).json({
+                message: "User already exists"
+            })
         }
     }
     newU();
@@ -97,6 +97,7 @@ export const activate_account = async (req, res) => {
                                 message: 'Account activated'
                             });
                         }else{
+                            
                             console.log("No se pudo");
                         }
                 }
