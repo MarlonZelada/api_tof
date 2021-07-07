@@ -108,9 +108,50 @@ export const activate_account = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    res.status(200).json({
-        message: "Login OK"
-    })
+    const { user, password } = req.body;
+    const values = {};
+    //Validate if the fields are not empty
+    if(!(user && password)){
+        res.status(400).json({
+            message: "All the fiels are required"
+        })
+        
+    }
+    values.user = user;
+    values.password = password;
+    async function findLogin (){
+        const findUser = await usuario.fyndByUser(values);
+        //Validate if user exists
+        if(findUser.usuario){
+            values.hash = findUser.passwordHash;
+            const findPassword = await extras.verificationPassword(values);
+            //Validate if the password is correct
+            if(findPassword){
+                res.status(200).json({
+                    message: "Welcome"
+                })
+            }else{
+                res.status(400).json({
+                    message: "User or password does not existe"
+                });
+            }
+
+        }else{
+            res.status(400).json({
+                message: "User or password does not existe"
+            });
+        }
+        
+        
+    }
+    findLogin();
+
+
+
+
+    //res.status(200).json({
+    //    message: "Login OK"
+    //})
 }
 
 export const recoveryPassword = async (req, res) => {

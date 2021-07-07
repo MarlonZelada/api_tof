@@ -43,9 +43,21 @@ function createHash(data) {
         });
     });
 }
-
+function verificationPassword(data){
+    return new Promise((resolved, reject) => {
+        const password = data.password;
+        const hashsaved = data.hash;
+        let compare = bcrypts.compareSync(password, hashsaved);
+        if(compare){
+            resolved(true);
+        }else {
+            resolved(false);
+        }
+    })
+}
 export const extras = {
     createToken,
     verificationToken,
-    createHash
+    createHash,
+    verificationPassword
 }

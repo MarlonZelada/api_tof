@@ -30,7 +30,7 @@ function fyndByUser(data){
               if(res.length > 0){
                 let dat = {};
                 dat.usuario = res[0].usuario;
-                dat.password = res[0].password;
+                dat.passwordHash = res[0].password;
                 resolved(dat);
               }else{
                   resolved(false);
