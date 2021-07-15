@@ -1,10 +1,11 @@
 import mysql from 'mysql';
+require('dotenv').config();
 
 const mysqlConection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
+    host: process.env.HOST,
+    user: process.env.USER,
     password: process.env.PASSWORD,
-    database: 'todogar',
+    database: process.env.DATABASE,
     multipleStatements: true
 })
 
