@@ -19,6 +19,9 @@ function verificationToken(data){
         
         let now = Date.now().valueOf() / 1000;
         jwtPayload = jwt.decode(token, process.env.SECRET_JWT);
+        //console.log(process.env.TOKEN_EXPIRED)
+        //console.log(jwtPayload.exp, now);
+        //console.log(jwtPayload.exp -  now);
         
         if(jwtPayload.exp < now){
             resolved(false);

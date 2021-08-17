@@ -5,10 +5,12 @@ function newUser(data) {
     return new Promise((resolved, reject) => {
         const name = data.name;
         const user = data.user;
+        const direccion = data.direccion;
+        const correo_electronico = data.user;
         const password = data.passwordH;
         const token = data.token;
 
-        conexion.query('insert into usuario (nombre, usuario, password) values (?,?,?)', [name, user, password], function (err, res) {
+        conexion.query('insert into usuario (Nombre, Username, Password, Correo_Electronico, Direccion) values (?,?,?,?,?)', [name, user, password, correo_electronico, direccion], function (err, res) {
             if (err) {
                 return console.log("err", err);
             } else {
@@ -23,14 +25,19 @@ function newUser(data) {
 function fyndByUser(data){
   return new Promise((resolved, reject) =>{
       const user = data.user;
-      conexion.query('select *from usuario where usuario = ?', [user], function(err, res){
+      conexion.query('select *from usuario where Username = ?', [user], function(err, res){
           if(err){
               return console.log("err", err);
           }else{
               if(res.length > 0){
                 let dat = {};
-                dat.usuario = res[0].usuario;
-                dat.passwordHash = res[0].password;
+                dat.id = res[0].Id_Usuario;
+                dat.nombre = res[0].Nombre;
+                dat.usuario = res[0].Username;
+                dat.direccion = res[0].Direccion;
+                dat.correo_electronico = res[0].Correo_Electronico;
+                dat.estado = res[0].Estado;
+                dat.passwordHash = res[0].Password;
                 resolved(dat);
               }else{
                   resolved(false);
@@ -43,8 +50,7 @@ function fyndByUser(data){
 function fyndById(data){
     return new Promise((resolved, reject) => {
         const id = data.id;
-        console.log("id fynd", id);
-        conexion.query('select *from usuario where id_usuario = ?', [id], function(err, res){
+        conexion.query('select *from usuario where Id_Usuario = ?', [id], function(err, res){
             if(err){
                 return console.log("err fyndById", err);
             }else{
@@ -61,8 +67,8 @@ function fyndById(data){
 function activateAccount(data){
     return new Promise((resolved, reject) => {
         const id= data.id;
-        console.log("id activate", id);
-        conexion.query('update usuario set estado = 1 where id_usuario = ?', [id], function(err, res){
+        
+        conexion.query('update usuario set Estado = 1, Aprobado = 1 where Id_Usuario = ?', [id], function(err, res){
             if(err){
                 return console.log("err", err);
             }else{
@@ -72,11 +78,13 @@ function activateAccount(data){
     });
 }
 
-function saveToken(data){
+//Cambiar el estado del ultimo token usado a 0=inactivo
+function changeLastToken(data){
     return new Promise((resolved, reject) =>{
         const token = data.token;
         const user = data.user;
-        conexion.query('update usuario set token = ? where usuario = ?', [token, user], function(err, res){
+        const tipo_token = data.tipo_token;
+        conexion.query('update token set Ultimo_Token_Usado = 0 where usuario = ? and Tipo_Token = ?', [user, tipo_token], function(err, res){
             if(err){
                 return console.log("err", err);
             }else{
@@ -85,9 +93,78 @@ function saveToken(data){
         })
     });
 }
-function newPassword() {
+
+//Guardar token nuevo
+function saveToken(data){
+    return new Promise((resolved, reject) => {
+        const token = data.token;
+        const user = data.user;
+        const id_user = data.id;
+        const tipo_token = data.tipo_token;
+        conexion.query('insert into token (Token, Usuario, Tipo_Token) values(?, ?, ?)', [token, user, tipo_token ], function(err, res){
+            if(err){
+                reject(err);
+            }else{
+                resolved(true);
+            }
+        })
+    })
+}
+
+//Cambiar el estato del token a 1=activo
+function updateToken(data){
+    return new Promise((resolved, reject) => {
+        const token = data.token;
+        const user = data.user;
+        const tipo_token = data.tipo_token;
+        conexion.query('update token set Estado_Token = 1 where Usuario = ? and Tipo_Token = ? and Ultimo_Token_Usado = 1', [user, tipo_token], function(err, res){
+            if(err){
+                reject(err);
+            }else{
+                resolved(true);
+            }
+        })
+    })
+}
+//Actualizar Password
+function newPassword(data) {
+    return new Promise((resolved, reject) => {
+        const user = data.user;
+        const password = data.hash;
+        conexion.query('update usuario set Password = ? where Username = ?', [password, user], function(err, res) {
+            if(err){
+                reject(err);
+            }else{
+                resolved(true);
+            }
+        })
+
+
+    })
 
 }
+
+function saveTokenPassword(data){
+    return new Promise((resolved, reject) => {
+        const token = data.token;
+        const user = data.user;
+        const ultimo_uso_token = 2;
+        //console.log("Token",token);
+        //console.log("Usuario",user);
+        //console.log("Ultimo token",ultimo_uso_token);
+        conexion.query('insert into token (Token, Usuario, Tipo_Token) values(?, ?, ?)', [token, user, ultimo_uso_token], function(err, res){
+            if(err){
+                reject(err);
+            }else{
+                resolved(true);
+            }
+        })
+
+    })
+}
+
+
+
 
 export const usuario = {
     newUser,
@@ -95,5 +172,9 @@ export const usuario = {
     fyndByUser,
     fyndById,    
     saveToken,
-    activateAccount
+    activateAccount,
+    updateToken,
+    changeLastToken,
+    newPassword,
+    saveTokenPassword
 }
