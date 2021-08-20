@@ -69,10 +69,25 @@ function verificarCorreo(data){
     }
 }
 
+function respuestaJson(msgtype, dataCount, message, redirect, customRtn) {
+    const respuesta = {};
+    respuesta.resultado = {
+        "result": {
+            msgtype,
+            dataCount,
+            message,
+            redirect,
+            customRtn 
+        }
+    }
+    return respuesta;
+}
+
 export const extras = {
     createToken,
     verificationToken,
     createHash,
     verificationPassword,
-    verificarCorreo
+    verificarCorreo,
+    respuestaJson
 }

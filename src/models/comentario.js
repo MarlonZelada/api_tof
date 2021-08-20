@@ -16,9 +16,16 @@ function newComment(data){
     })
 }
 function updateComment(data){
-    return new Promise((resolve, reject) => {
-        conexion.query('', [], function(err, res){
-            
+    return new Promise((resolved, reject) => {
+        const id_post_comentario = data.id_post_comentario;
+        const comentario = data.comentario;
+        conexion.query('update post_comentario set Comentario = ?, FechaHora_Actualizacion = now() where Id_Post_Comentario = ?', [comentario, id_post_comentario], function(err, res){
+            if(err){
+                console.log("error", err);
+            }else{
+                resolved(true);
+
+            }
         })
     })
 
@@ -26,7 +33,7 @@ function updateComment(data){
 function deleteComment(data){
     return new Promise((resolved, reject) => {
         const id_post_comentario = data.id_post_comentario;
-        conexion.query('update post_comentario set Eliminado = 1 where Id_Post_Comentario = ?', [id_post_comentario], function(err, res){
+        conexion.query('update post_comentario set Eliminado = 1, FechaHora_Actualizacion = now() where Id_Post_Comentario = ?', [id_post_comentario], function(err, res){
             if(err){
                 console.log("error", err)
             }else{
