@@ -79,10 +79,69 @@ function deletePost(data){
         })
     })
 }
+function allPostComment(data) {
+    return new Promise((resolved, reject) => {
+        const id_post = data.id_post;
+        const id_post_comentario_padre = data.id_post_comentario_padre;
+        const val = {};
+    
+        const query1 = `select pc.Id_Post, pc.Id_Post_Comentario, pc.FechaHora_Creacion, pc.Comentario, us.Nombre
+                        from post_comentario pc INNER JOIN usuario  us
+                        ON pc.Id_Usuario = us.Id_Usuario
+                        WHERE Id_Post_Comentario_Padre is null
+                        AND Id_Post = ?
+                        AND pc.Eliminado=0 `;
+        const query2 = `select pc.Id_Post, pc.Id_Post_Comentario, pc.FechaHora_Creacion, pc.Comentario, us.Nombre
+                        from post_comentario pc INNER JOIN usuario  us
+                        ON pc.Id_Usuario = us.Id_Usuario
+                        WHERE Id_Post_Comentario_Padre = ?
+                        AND Id_Post = ?
+                        AND pc.Eliminado=0`
+        if(!id_post_comentario_padre){
+            console.log("ES null");
+            conexion.query(query1, [id_post], function (err, res) {
+                if(err){
+                    reject("error", err)
+                }else{
+                    for(let i=0; i<res.length; i++){
+                        let valores = {}
+                        valores.id_post_comentario = res[i].Id_Post_Comentario;
+                        valores.comentario = res[i].Comentario;
+                        valores.usuario = res[i].Nombre;
+                        valores.id_post = res[i].Id_Post
+                        val[i] = valores
+                    }
+                    resolved(val);
+                }   
+            })
+        }else{
+            console.log("NO es null");
+            conexion.query(query2, [id_post_comentario_padre, id_post], function (err, res) {
+                if(err){
+                    reject("error", err);
+                }else{
+                    for(let i=0; i<res.length; i++){
+                        let valores = {}
+                        valores.id_post_comentario = res[i].Id_Post_Comentario;
+                        valores.comentario = res[i].Comentario;
+                        valores.usuario = res[i].Nombre;
+                        valores.id_post = res[i].Id_Post
+                        val[i] = valores
+                    }
+                    resolved(val);
+                }                
+            })
+        }
+        
+
+
+    })    
+}
 
 export const posts = {
     newPost,
     findPostById,
     updatePost,
-    deletePost
+    deletePost,
+    allPostComment
 }

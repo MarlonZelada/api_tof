@@ -38,11 +38,14 @@ const upload = multer({
 
 router.post('/', postCtrl.newPost);
 
+router.get('/', postCtrl.getPost);
+
 router.put('/', postCtrl.updatePost);
 
 router.delete('/', postCtrl.deletePost);
 
-router.get('/',  postCtrl.imagen);
+
+//router.get('/',  postCtrl.imagen);
 
 
 export default router;

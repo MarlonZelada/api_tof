@@ -2,7 +2,9 @@ import { usuario } from '../models/user';
 import { posts } from '../models/post';
 import { inmueble } from '../models/inmueble';
 import { media } from '../models/media';
-//import { multer } from "multer";
+import { extras } from '../helpers/extras';
+import { Console, log } from 'console';
+//import  multer from "multer";
 //import { path } from "path";
 
 
@@ -10,10 +12,15 @@ const path = require ('path');
 const multer = require('multer');
 require('dotenv').config();
 
-export const newPost = async (req, res) => {
 
+
+        
+
+export const newPost = async (req, res) => {
     const { tipo, privacidad, descripcion, user, id_inmueble, admin_post} = req.body;
+    console.log(tipo)
     const values = {};
+    const rutaCarpeta = {};
 
     if(!tipo){
         return res.json({
@@ -133,15 +140,57 @@ export const newPost = async (req, res) => {
                 }
             })
         }
-        //-----------Imagenes
+
         values.id_post = nuevoPost.id_post;
+
+        const rutaURL = await extras.carpeta(nuevoPost.id_post);
+
+        if(rutaURL){
+            rutaCarpeta.rutaURL = rutaURL;
+            const guardaImagen = await extras.guardarArchivos(rutaURL);
+            /*const storage = multer.diskStorage({
+                destination:(req, file, cb)=>{
+                    cb(null, rutaURL)
+                },
+                filename: (req, file, cb) => {
+                    cb(null,  "A"+aleatorio() +"CDB"+ path.extname(file.originalname));
+                }
+            });
+
+            const upload = multer({ 
+                storage,
+                
+            }).array('file');*/
+
+            //upload();
+
+
+
+
+        }else{
+            console.log("Aqui llego");
+        }
+        
+
+        
+        console.log("ID POST",nuevoPost.id_post);
+
+
+        //-----------Imagenes
+
+
+
+
+
+
+        
         const tamaño = req.files.length;
 
         for(let i=0; i<tamaño; i++){
             const originalname = req.files[i].originalname;
             const filename = req.files[i].filename;
             const tipoArchivo = req.files[i].mimetype.split('/')[0];
-            console.log("tipo archivo", tipoArchivo);
+            //console.log("tipo archivo", tipoArchivo);
             const path = req.files[i].path;
             const size = req.files[i].size;
             const tipo = '';
@@ -158,7 +207,7 @@ export const newPost = async (req, res) => {
         
             const guardarArchivo = await media.saveMedia(values);
             if(guardarArchivo){
-                console.log("Archivo Guardado");
+                //console.log("Archivo Guardado");
             }else{
                 console.log("Algo salio mal");
             }
@@ -185,6 +234,33 @@ export const newPost = async (req, res) => {
         })
     }
     nuevoPost();
+}
+
+
+export const getPost = async (req, res) => {
+    const {id_post, id_post_comentario_padre} = req.body;
+    const values={};
+    if(!id_post){
+        return res.json(
+            extras.respuestaJson("E", 0, "Es necesario el id_post", "", null)
+
+        )
+    }
+    values.id_post = id_post;
+    if(!id_post_comentario_padre){
+        values.id_post_comentario_padre = null;
+    }else{
+        values.id_post_comentario_padre = id_post_comentario_padre;
+    }
+
+    async function getPosts() {
+        const buscarPostComentario = await posts.allPostComment(values);
+        return res.json(
+            buscarPostComentario
+        )    
+    }
+    getPosts();
+    
 }
 
 export const updatePost = async (req, res) => {

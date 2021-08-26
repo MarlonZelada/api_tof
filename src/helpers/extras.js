@@ -1,6 +1,8 @@
 
 import bcrypts from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+const fs = require('fs');
+const multer = require('multer');
 require('dotenv').config();
 
 function createToken(data) {
@@ -83,11 +85,53 @@ function respuestaJson(msgtype, dataCount, message, redirect, customRtn) {
     return respuesta;
 }
 
+function carpeta(id_post) {
+    return new Promise((resolved, reject) => {
+        const url = process.env.ROUTE_MEDIA
+        const id_postURL = url+ '/'+ 'i_'  + id_post;
+
+        if(fs.existsSync(`${id_postURL}`)){
+            console.log("Ya existe el directorio");
+            resolved(id_postURL);
+        }else{
+            fs.mkdir(`${id_postURL}`, (error) => {
+                if(error){
+                    console.log(error.message);
+                }
+                resolved(id_postURL);
+            })
+        }       
+    })
+}
+
+function guardarArchivos(data) {
+    return new Promise((resolved, reject) => {
+        rutaURL = data.rutaURL;
+        const storage = multer.diskStorage({
+            destination:(req, file, cb)=>{
+                cb(null, rutaURL)
+            },
+            filename: (req, file, cb) => {
+                cb(null,  "A"+aleatorio() +"CDB"+ path.extname(file.originalname));
+            }
+        });
+
+        const upload = multer({
+            storage,
+        }).array('file');
+    })
+}
+
+
+
+
 export const extras = {
     createToken,
     verificationToken,
     createHash,
     verificationPassword,
     verificarCorreo,
-    respuestaJson
+    respuestaJson,
+    carpeta,
+    guardarArchivos
 }
